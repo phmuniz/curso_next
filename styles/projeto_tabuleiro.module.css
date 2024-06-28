@@ -1,0 +1,11 @@
+.body{
+    height: 100vh;
+    background-color: gray;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.linha{
+    display: flex;
+}
