@@ -1,7 +1,7 @@
 import Link from "next/link"
 import router, { useRouter } from "next/router"
 
-export default function rotas(){
+export default function Rotas(){
 
     function navegacao_simples(url){
         router.push(url)

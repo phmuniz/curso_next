@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 
-export default function codigoENome(){
+export default function CodigoENome(){
 
     const router = useRouter()
     const codigo = router.query.codigo
