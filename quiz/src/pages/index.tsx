@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import RespostaModel from "@/model/resposta";
 
 
-const BASE_URL = 'http://localhost:3000/api'
+const BASE_URL = '/api'
 
 
 export default function Home() {
