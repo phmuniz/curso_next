@@ -2,15 +2,30 @@ import Questao from "@/components/Questao";
 import RespostaModel from "@/model/resposta";
 import QuestaoModel from "@/model/questao";
 import Head from "next/head";
+import { useState } from "react";
+
+const questaoMock = new QuestaoModel(1, 'Melhor Cor?', [
+  RespostaModel.errada('verde'),
+  RespostaModel.errada('vermelha'),
+  RespostaModel.errada('azul'),
+  RespostaModel.certa('preta')
+])
 
 export default function Home() {
 
-  const questaoTeste = new QuestaoModel(1, 'Melhor Cor?', [
-    RespostaModel.errada('verde'),
-    RespostaModel.errada('vermelha'),
-    RespostaModel.errada('azul'),
-    RespostaModel.certa('preta')
-  ])
+  const [questao, setQuestao] = useState(questaoMock)
+
+  function respostaFornecida(indice: number){
+    setQuestao(questao.responderCom(indice))
+    console.log(indice)
+  }
+
+  function tempoEsgotado(){
+
+    if(!questao.respondida){
+      setQuestao(questao.responderCom(-1))
+    }
+  }
 
   return (
     <>
@@ -21,7 +36,10 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <Questao valor={questaoTeste}/>
+        <Questao valor={questao}
+          respostaFornecida={respostaFornecida}
+          tempoEsgotado={tempoEsgotado}
+        />
       </main>
     </>
   );
