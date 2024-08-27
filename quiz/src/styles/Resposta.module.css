@@ -4,12 +4,20 @@
     margin: 10px;
     width: 80%;
     min-width: 500px;
+    perspective: 1000px;
+    cursor: pointer;
 }
 
 .conteudoResposta {
     position: relative;
     display: flex;
     flex: 1;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+.respostaRevelada.conteudoResposta {
+    transform: rotateY(180deg);
 }
 
 .frente, .verso {
@@ -17,6 +25,8 @@
     display: flex;
     height: 100%;
     width: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 .frente {
@@ -26,6 +36,10 @@
     color: #000;
     padding: 15px;
     background-color: #fff;
+}
+
+.verso {
+    transform: rotateY(180deg);
 }
 
 .verso > div {

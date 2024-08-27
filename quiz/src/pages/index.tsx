@@ -1,30 +1,76 @@
-import Questao from "@/components/Questao";
-import RespostaModel from "@/model/resposta";
 import QuestaoModel from "@/model/questao";
 import Head from "next/head";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Questionario from "@/components/Questionario";
+import { useRouter } from "next/router";
+import RespostaModel from "@/model/resposta";
 
-const questaoMock = new QuestaoModel(1, 'Melhor Cor?', [
-  RespostaModel.errada('verde'),
-  RespostaModel.errada('vermelha'),
-  RespostaModel.errada('azul'),
-  RespostaModel.certa('preta')
-])
+
+const BASE_URL = 'http://localhost:3000/api'
+
 
 export default function Home() {
 
-  const [questao, setQuestao] = useState(questaoMock)
+  const router = useRouter()
 
-  function respostaFornecida(indice: number){
-    setQuestao(questao.responderCom(indice))
-    console.log(indice)
+  const [idsDasQuestoes, setIdsDasQuestoes] = useState<number[]>([])
+  const [respostasCertas, setRespostasCertas] = useState<number>(0)
+  const [questao, setQuestao] = useState<QuestaoModel>()
+
+  async function carregarIdsQuestoes() {
+    
+    const resp = await fetch(`${BASE_URL}/questionario`)
+    const idsDasQuestoes = await resp.json()
+    setIdsDasQuestoes(idsDasQuestoes)
   }
 
-  function tempoEsgotado(){
+  async function carregarQuestao(idQuestao: number) {
+    
+    const resp = await fetch(`${BASE_URL}/questoes/${idQuestao}`)
+    const json = await resp.json()
+    const novaQuestao = QuestaoModel.criarUsandoObjeto(json)
+    setQuestao(novaQuestao)
+  }
 
-    if(!questao.respondida){
-      setQuestao(questao.responderCom(-1))
+  useEffect(() => {
+    carregarIdsQuestoes()
+  }, [])
+
+  useEffect(() => {
+    idsDasQuestoes.length > 0 && carregarQuestao(idsDasQuestoes[0])
+  }, [idsDasQuestoes])
+
+  function questaoRespondida(questaoRespondida: QuestaoModel){
+    setQuestao(questaoRespondida)
+    const acertou = questaoRespondida.acertou
+    setRespostasCertas(respostasCertas + (acertou ? 1 : 0))
+  }
+
+  function idProximaPergunta() {
+
+    if(questao){
+      const proximoIndice = idsDasQuestoes.indexOf(questao.id) + 1
+      return idsDasQuestoes[proximoIndice]
     }
+  }
+
+  function irPraProximoPasso(){
+    const proximoId = idProximaPergunta()
+    proximoId ? irPraProximoQuestao(proximoId) : finalizar()
+  }
+
+  function irPraProximoQuestao(proximoId: number) {
+    carregarQuestao(proximoId)
+  }
+
+  function finalizar() {
+    router.push({
+      pathname: '/resultado',
+      query: {
+        total: idsDasQuestoes.length,
+        certas: respostasCertas
+      }
+    })
   }
 
   return (
@@ -35,12 +81,19 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main>
-        <Questao valor={questao}
-          respostaFornecida={respostaFornecida}
-          tempoEsgotado={tempoEsgotado}
+      
+      {
+        questao ? (
+          <Questionario
+          questao={questao}
+          ultima={idProximaPergunta() === undefined}
+          questaoRespondida={questaoRespondida}
+          irPraProximoPasso={irPraProximoPasso}
         />
-      </main>
+        )
+        : false
+      }
+
     </>
   );
 }
