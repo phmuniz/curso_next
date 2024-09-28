@@ -6,6 +6,7 @@ import Cookies from "js-cookie"
 
 interface AuthContextProps {
     usuario?: Usuario
+    carregando?: boolean
     loginGoogle?: () => Promise<void>
     logout?: () => Promise<void>
 }
@@ -30,7 +31,7 @@ async function usuarioNormalizado(usuarioFirebase: firebase.User): Promise<Usuar
     }
 }
 
-function gerenciarCookie(logado: boolean){
+function gerenciarCookie(logado: string){
 
     if(logado) {
         Cookies.set('admin-template-auth', logado, {
@@ -52,13 +53,13 @@ export function AuthProvider(props: AuthProviderProps){
         if(usuarioFirebase?.email) {
             const usuario = await usuarioNormalizado(usuarioFirebase)
             setUsuario(usuario)
-            gerenciarCookie(true);
+            gerenciarCookie('true');
             setCarregando(false)
             return usuario.email
         }
         else {
             setUsuario(null)
-            gerenciarCookie(false)
+            gerenciarCookie('false')
             setCarregando(false)
             return false
         }
@@ -98,12 +99,15 @@ export function AuthProvider(props: AuthProviderProps){
         if(Cookies.get('admin-template-auth')){
             const cancelar = firebase.auth().onIdTokenChanged(configurarSessao)
             return () => cancelar()
+        } else {
+            setCarregando(false)
         }
     }, [])
 
     return(
         <AuthContext.Provider value={{
             usuario: usuario ? usuario : undefined,
+            carregando,
             loginGoogle,
             logout
         }}>
